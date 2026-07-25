@@ -1,0 +1,1598 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Explore luxury Indian clothing, bridal lehengas, silk palazzos, kurtas, and turbans at Jodhan Silk Store. Crafting premium heritage garments since 1985."
+    />
+    <title>Jodhan Silk Store | Premium Indian Heritage Clothing</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Main Navigation Header -->
+    <header class="navbar-header">
+      <div class="container navbar-content">
+        <a
+          href="#"
+          class="brand-logo"
+          onclick="
+            location.reload();
+            return false;
+          "
+        >
+          Jodhan Silk Store<span>Est.1970</span>
+        </a>
+        <nav class="nav-links">
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-toggle">Menu</button>
+            <div class="nav-dropdown-menu">
+              <a
+                href="#"
+                onclick="
+                  scrollToSection('new-arrivals');
+                  return false;
+                "
+                >New Arrivals</a
+              >
+              <a
+                href="#"
+                onclick="
+                  scrollToSection('product-grid-section');
+                  return false;
+                "
+                >Catalogs</a
+              >
+              <a
+                href="#"
+                onclick="
+                  scrollToSection('footer-section');
+                  return false;
+                "
+                >Contact Us</a
+              >
+            </div>
+          </div>
+          <div class="nav-search">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search products..."
+              oninput="filterProductsBySearch(this.value)"
+            />
+            <svg
+              class="search-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        </nav>
+        <div class="nav-actions">
+          <button
+            id="nav-country-btn"
+            class="btn-text"
+            style="
+              text-transform: none;
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              border: 1px solid var(--border-color);
+              padding: 6px 12px;
+              border-radius: 20px;
+            "
+            onclick="openCountryGate(true)"
+          >
+            <span id="selected-country-flag">🇮🇳</span>
+            <span id="selected-country-name">India</span>
+          </button>
+          <select
+            id="currency-select"
+            class="currency-select"
+            onchange="switchCurrency(this.value)"
+          >
+            <option value="INR">₹ INR</option>
+            <option value="USD">$ USD</option>
+            <option value="CAD">CA$ CAD</option>
+            <option value="GBP">£ GBP</option>
+            <option value="EUR">€ EUR</option>
+            <option value="AED">د.إ AED</option>
+          </select>
+          <span id="rate-status" class="rate-status" title="Exchange rates"
+            >Live</span
+          >
+          <div id="user-session-container">
+            <button class="btn-text" onclick="openAuthModal()">
+              Login / Sign Up
+            </button>
+          </div>
+          <button class="cart-toggle-btn" onclick="openCartDrawer()">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.8"
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+              />
+            </svg>
+            Bag
+            <span id="cart-count">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 1. Customer Storefront View -->
+    <main id="customer-storefront-view">
+      <!-- Hero Banner Section -->
+      <section class="hero-banner-section container">
+        <div class="hero-banner-wrap">
+          <video
+            src="Video.mov"
+            autoplay
+            muted
+            loop
+            playsinline
+            style="width: 100%; display: block; border-radius: 12px"
+          ></video>
+          <div class="hero-overlay-content">
+            <div class="hero-overlay-top">
+              <a
+                href="https://wa.me/919478600048"
+                target="_blank"
+                class="whatsapp-banner-btn"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+                  />
+                </svg>
+                Order on WhatsApp
+              </a>
+            </div>
+            <div class="hero-overlay-bottom">
+              <h2 class="scroll-animate">Heritage Elegance</h2>
+              <p class="scroll-animate">
+                Discover our curated collections of luxury bridal wear, designer
+                silk outfits, and custom tailored ensembles designed for your
+                special occasions.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- New Arrivals Section -->
+      <section id="new-arrivals" class="product-grid-section container">
+        <div class="grid-title-row">
+          <h2>New Arrivals</h2>
+        </div>
+        <div class="product-grid" id="new-arrivals-grid">
+          <!-- Populated by JavaScript -->
+        </div>
+      </section>
+
+      <!-- Category Navigation Section -->
+      <section
+        id="category-filters-section"
+        class="category-filter-section container"
+      >
+        <div class="category-filter-container" id="category-filters">
+          <!-- Populated by JavaScript -->
+        </div>
+      </section>
+
+      <!-- Products Grid Section -->
+      <section id="product-grid-section" class="product-grid-section container">
+        <div class="grid-title-row">
+          <h2>Our Collections</h2>
+        </div>
+        <div class="product-grid" id="product-grid">
+          <!-- Populated by JavaScript -->
+        </div>
+      </section>
+    </main>
+
+    <!-- 2. Admin Dashboard View (Initially Hidden) -->
+    <main id="admin-dashboard-view">
+      <div class="container">
+        <header class="admin-dashboard-header">
+          <div>
+            <h1>Admin Control Panel</h1>
+            <p>
+              Modify inventory prices, stock, availability, edit or create
+              listings, manage shipping countries, or manage bank accounts.
+            </p>
+          </div>
+          <button class="btn-secondary" onclick="exitAdminMode()">
+            Exit Admin Mode
+          </button>
+        </header>
+
+        <!-- Admin Tab Navigation -->
+        <div class="admin-tabs-nav">
+          <button
+            class="admin-tab-btn active"
+            id="btn-tab-inventory"
+            onclick="switchAdminTab('inventory')"
+          >
+            Inventory Catalog
+          </button>
+          <button
+            class="admin-tab-btn"
+            id="btn-tab-categories"
+            onclick="switchAdminTab('categories')"
+          >
+            Manage Categories
+          </button>
+          <button
+            class="admin-tab-btn"
+            id="btn-tab-countries"
+            onclick="switchAdminTab('countries')"
+          >
+            Manage Countries
+          </button>
+          <button
+            class="admin-tab-btn"
+            id="btn-tab-banking"
+            onclick="switchAdminTab('banking')"
+          >
+            Payouts & Banking
+          </button>
+          <button
+            class="admin-tab-btn"
+            id="btn-tab-orders"
+            onclick="switchAdminTab('orders')"
+          >
+            Orders
+          </button>
+        </div>
+
+        <!-- 2A. TAB: Inventory Catalog -->
+        <div id="admin-tab-inventory" class="admin-tab-content">
+          <div class="admin-dashboard-layout">
+            <!-- Left Column: Add Product Listing Form -->
+            <aside class="admin-sidebar-card">
+              <h3>Create New Listing</h3>
+              <button
+                type="button"
+                onclick="wipeBadItems()"
+                style="
+                  font-size: 0.7rem;
+                  margin-bottom: 0.5rem;
+                  padding: 0.3rem 0.6rem;
+                  background: #dc2626;
+                  color: #fff;
+                  border: none;
+                  border-radius: 4px;
+                  cursor: pointer;
+                "
+              >
+                Wipe Bad Items
+              </button>
+              <form id="add-product-form" onsubmit="handleCreateProduct(event)">
+                <div class="form-group">
+                  <label for="new-prod-title">Product Title *</label>
+                  <input
+                    type="text"
+                    id="new-prod-title"
+                    placeholder="e.g., Silk Turban, Georgette Lehenga"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="new-prod-price">Price (INR, ₹) *</label>
+                  <input
+                    type="number"
+                    id="new-prod-price"
+                    placeholder="e.g., 29900"
+                    min="0"
+                    step="any"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="new-prod-category">Category *</label>
+                  <select id="new-prod-category" required>
+                    <option value="" disabled selected>Select Category</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="new-prod-stock">Current Stock (Qty)</label>
+                  <input
+                    type="number"
+                    id="new-prod-stock"
+                    placeholder="e.g., 10"
+                    min="0"
+                    value="0"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="new-prod-desc">Description *</label>
+                  <textarea
+                    id="new-prod-desc"
+                    rows="4"
+                    placeholder="Enter product description, fabric types, care instructions..."
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label>Photos (multiple allowed)</label>
+                  <label for="new-prod-image" class="image-upload-zone">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span>Click to choose images (can select multiple)</span>
+                    <input
+                      type="file"
+                      id="new-prod-image"
+                      accept="image/*"
+                      multiple
+                    />
+                  </label>
+                  <div id="image-upload-preview" class="multi-image-preview">
+                    <span>No images selected</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Videos (optional)</label>
+                  <label
+                    for="new-prod-video"
+                    class="image-upload-zone"
+                    style="border-style: dashed; padding: 1rem"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span
+                      >Click to choose videos (mp4, webm, max ~10MB each)</span
+                    >
+                    <input type="file" id="new-prod-video" accept="video/*" />
+                  </label>
+                  <div id="video-upload-preview" class="multi-image-preview">
+                    <span>No videos selected</span>
+                  </div>
+                </div>
+
+                <div
+                  class="form-group"
+                  style="
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 0.75rem;
+                    margin-top: 1rem;
+                  "
+                >
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="new-prod-avail" checked />
+                    <label for="new-prod-avail"></label>
+                  </div>
+                  <label
+                    for="new-prod-avail"
+                    style="
+                      cursor: pointer;
+                      text-transform: none;
+                      font-size: 0.9rem;
+                    "
+                    >Mark as Available (In Stock)</label
+                  >
+                </div>
+
+                <div class="form-actions-row">
+                  <button type="submit" class="btn-primary">
+                    Create Listing
+                  </button>
+                </div>
+              </form>
+            </aside>
+
+            <!-- Right Column: Inventory List manager -->
+            <section class="admin-main-panel">
+              <h3>Active Store Catalog</h3>
+              <div id="admin-products-list">
+                <!-- Populated by JavaScript -->
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- 2B. TAB: Category Management -->
+        <div
+          id="admin-tab-categories"
+          class="admin-tab-content"
+          style="display: none"
+        >
+          <div class="admin-dashboard-layout">
+            <aside class="admin-sidebar-card">
+              <h3>Add Product Category</h3>
+              <form
+                id="add-category-form"
+                onsubmit="handleCreateCategory(event)"
+              >
+                <div class="form-group">
+                  <label for="new-category-name">Category Name *</label>
+                  <input
+                    type="text"
+                    id="new-category-name"
+                    placeholder="e.g., Sherwani, Anarkali"
+                    required
+                  />
+                </div>
+                <div class="form-actions-row">
+                  <button type="submit" class="btn-primary">
+                    Add Category
+                  </button>
+                </div>
+              </form>
+            </aside>
+
+            <section class="admin-main-panel">
+              <h3>Storefront Categories</h3>
+              <div class="admin-table-container">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Category Name</th>
+                      <th>Products</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-categories-list">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- 2C. TAB: Country Management -->
+        <div
+          id="admin-tab-countries"
+          class="admin-tab-content"
+          style="display: none"
+        >
+          <div class="admin-dashboard-layout">
+            <aside class="admin-sidebar-card">
+              <h3>Add Supported Country</h3>
+              <form id="add-country-form" onsubmit="handleCreateCountry(event)">
+                <div class="form-group">
+                  <label for="new-country-name">Country Name *</label>
+                  <input
+                    type="text"
+                    id="new-country-name"
+                    placeholder="e.g., Canada, United Kingdom"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="new-country-flag">Flag Emoji *</label>
+                  <input
+                    type="text"
+                    id="new-country-flag"
+                    placeholder="e.g., 🇨🇦, 🇬🇧"
+                    required
+                  />
+                </div>
+                <div class="form-actions-row">
+                  <button type="submit" class="btn-primary">Add Country</button>
+                </div>
+              </form>
+            </aside>
+
+            <section class="admin-main-panel">
+              <h3>Supported Shipping Destinations</h3>
+              <div class="admin-table-container">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Flag</th>
+                      <th>Country Name</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-countries-list">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- 2E. TAB: Orders -->
+        <div
+          id="admin-tab-orders"
+          class="admin-tab-content"
+          style="display: none"
+        >
+          <div class="admin-main-panel">
+            <h3>Pending Orders</h3>
+            <div id="admin-orders-pending" class="admin-table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-orders-pending-list"></tbody>
+              </table>
+            </div>
+
+            <h3 style="margin-top: 2rem">Completed Orders</h3>
+            <div id="admin-orders-completed" class="admin-table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Completed</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-orders-completed-list"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2D. TAB: Payouts & Banking -->
+        <div
+          id="admin-tab-banking"
+          class="admin-tab-content"
+          style="display: none"
+        >
+          <div class="admin-dashboard-layout">
+            <aside class="admin-sidebar-card">
+              <h3>Add Payout Destination</h3>
+              <p class="admin-sidebar-note">
+                All customer checkout payments are deposited into whichever
+                account you mark as primary.
+              </p>
+
+              <div
+                class="payout-type-toggle"
+                role="tablist"
+                aria-label="Payout account type"
+              >
+                <button
+                  type="button"
+                  class="payout-type-btn active"
+                  id="payout-type-bank"
+                  onclick="switchPayoutFormType('bank')"
+                >
+                  Bank Account
+                </button>
+                <button
+                  type="button"
+                  class="payout-type-btn"
+                  id="payout-type-gpay"
+                  onclick="switchPayoutFormType('googlepay')"
+                >
+                  Google Pay / UPI
+                </button>
+              </div>
+
+              <form
+                id="add-bank-form"
+                onsubmit="handleCreatePayoutAccount(event)"
+              >
+                <div id="bank-payout-fields">
+                  <div class="form-group">
+                    <label for="new-bank-name">Bank Name *</label>
+                    <input
+                      type="text"
+                      id="new-bank-name"
+                      placeholder="e.g., State Bank of India"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="new-bank-holder">Account Holder Name *</label>
+                    <input
+                      type="text"
+                      id="new-bank-holder"
+                      placeholder="Prince Jodhan"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="new-bank-accno">Account Number *</label>
+                    <input
+                      type="text"
+                      id="new-bank-accno"
+                      placeholder="e.g., 98765432100"
+                      pattern="\d{9,18}"
+                      title="9 to 18 digits"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="new-bank-ifsc">IFSC / Routing Code *</label>
+                    <input
+                      type="text"
+                      id="new-bank-ifsc"
+                      placeholder="e.g., SBIN0001234"
+                    />
+                  </div>
+                </div>
+
+                <div id="gpay-payout-fields" style="display: none">
+                  <div class="form-group">
+                    <label for="new-gpay-holder">Account Holder Name *</label>
+                    <input
+                      type="text"
+                      id="new-gpay-holder"
+                      placeholder="Prince Jodhan"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="new-gpay-upi">Google Pay UPI ID *</label>
+                    <input
+                      type="text"
+                      id="new-gpay-upi"
+                      placeholder="e.g., prince@okaxis"
+                      pattern="[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+"
+                      title="Valid UPI ID, e.g. name@okaxis"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="new-gpay-phone">Linked Mobile Number</label>
+                    <input
+                      type="tel"
+                      id="new-gpay-phone"
+                      placeholder="e.g., +91 94786 00048"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="bank-qr-upload"
+                      >Bank Barcode / QR Code (checkout)</label
+                    >
+                    <label for="bank-qr-upload" class="image-upload-zone">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.8"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <span
+                        >Upload barcode / QR code image for customers to
+                        scan</span
+                      >
+                      <input type="file" id="bank-qr-upload" accept="image/*" />
+                    </label>
+                    <div id="bank-qr-preview" class="gpay-qr-preview">
+                      <span>No barcode uploaded yet</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="form-group"
+                  style="
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 0.75rem;
+                    margin-top: 1rem;
+                  "
+                >
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="new-payout-primary" />
+                    <label for="new-payout-primary"></label>
+                  </div>
+                  <label
+                    for="new-payout-primary"
+                    style="
+                      cursor: pointer;
+                      text-transform: none;
+                      font-size: 0.9rem;
+                    "
+                    >Receive all checkout payments here</label
+                  >
+                </div>
+
+                <div class="form-actions-row">
+                  <button
+                    type="submit"
+                    class="btn-primary"
+                    id="add-payout-submit-btn"
+                  >
+                    Link Bank Account
+                  </button>
+                </div>
+              </form>
+            </aside>
+
+            <section class="admin-main-panel">
+              <div id="active-payout-banner" class="active-payout-banner"></div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 1rem;
+                "
+              >
+                <h3>Payout Destinations</h3>
+                <span
+                  style="
+                    font-size: 0.8rem;
+                    color: var(--accent-gold-dark);
+                    font-weight: 600;
+                  "
+                  >Set one account as primary to receive all funds</span
+                >
+              </div>
+              <div id="admin-bank-accounts-grid" class="bank-accounts-grid">
+                <!-- Populated dynamically -->
+              </div>
+
+              <h3 style="margin-top: 2.5rem; margin-bottom: 1rem">
+                Direct Payout Transaction Ledger
+              </h3>
+              <div class="admin-table-container">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Order ID</th>
+                      <th>Received Amount</th>
+                      <th>Routed To</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-transactions-list">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Edit Product Modal -->
+    <div id="edit-product-modal" class="modal-overlay">
+      <div class="modal-container" style="max-width: 640px">
+        <div class="modal-header">
+          <h3>Edit Product</h3>
+          <button class="modal-close-btn" onclick="closeEditProduct()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-product-form" onsubmit="handleEditProduct(event)">
+            <input type="hidden" id="edit-prod-id" />
+
+            <div class="form-group">
+              <label for="edit-prod-title">Product Title *</label>
+              <input type="text" id="edit-prod-title" required />
+            </div>
+
+            <div class="form-group">
+              <label for="edit-prod-price">Price (₹) *</label>
+              <input
+                type="number"
+                id="edit-prod-price"
+                min="0"
+                step="any"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="edit-prod-category">Category *</label>
+              <select id="edit-prod-category" required>
+                <option value="" disabled selected>Select Category</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="edit-prod-desc">Description *</label>
+              <textarea id="edit-prod-desc" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Videos</label>
+              <input
+                type="file"
+                id="edit-prod-video"
+                accept="video/*"
+                style="font-size: 0.85rem"
+              />
+              <div
+                id="edit-video-preview"
+                style="
+                  display: flex;
+                  gap: 0.5rem;
+                  flex-wrap: wrap;
+                  margin-top: 0.5rem;
+                "
+              ></div>
+            </div>
+
+            <div
+              class="form-group"
+              style="
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 1rem;
+                background: var(--bg-secondary);
+              "
+            >
+              <label
+                style="
+                  font-size: 0.9rem;
+                  font-weight: 700;
+                  margin-bottom: 0.5rem;
+                "
+                >Colors & Stock</label
+              >
+              <div id="edit-colors-list"></div>
+              <div
+                style="
+                  border-top: 1px solid var(--border-color);
+                  padding-top: 0.75rem;
+                  margin-top: 0.75rem;
+                "
+              >
+                <label
+                  style="
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    display: block;
+                    margin-bottom: 0.5rem;
+                  "
+                  >Add New Color</label
+                >
+                <div
+                  style="
+                    display: flex;
+                    gap: 0.5rem;
+                    align-items: center;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <input
+                    type="text"
+                    id="edit-new-color-name"
+                    placeholder="Color name"
+                    style="
+                      flex: 1;
+                      min-width: 100px;
+                      padding: 0.5rem;
+                      border-radius: 4px;
+                      border: 1px solid var(--border-color);
+                      font-family: var(--font-sans);
+                      font-size: 0.85rem;
+                    "
+                  />
+                  <input
+                    type="number"
+                    id="edit-new-color-stock"
+                    placeholder="Stock"
+                    min="0"
+                    value="0"
+                    style="
+                      width: 70px;
+                      padding: 0.5rem;
+                      border-radius: 4px;
+                      border: 1px solid var(--border-color);
+                      font-family: var(--font-sans);
+                      font-size: 0.85rem;
+                    "
+                  />
+                  <button
+                    type="button"
+                    class="btn-colors"
+                    onclick="addEditColor()"
+                    style="white-space: nowrap"
+                  >
+                    + Add
+                  </button>
+                </div>
+                <div class="cm-rgb-row" style="margin-top: 0.5rem">
+                  <label>R</label
+                  ><input
+                    type="range"
+                    min="0"
+                    max="255"
+                    value="128"
+                    id="new-color-r"
+                    class="cm-rgb-slider"
+                    oninput="previewNewColorDot()"
+                  /><span class="cm-rgb-val" id="new-color-rv">128</span>
+                  <label>G</label
+                  ><input
+                    type="range"
+                    min="0"
+                    max="255"
+                    value="128"
+                    id="new-color-g"
+                    class="cm-rgb-slider"
+                    oninput="previewNewColorDot()"
+                  /><span class="cm-rgb-val" id="new-color-gv">128</span>
+                  <label>B</label
+                  ><input
+                    type="range"
+                    min="0"
+                    max="255"
+                    value="128"
+                    id="new-color-b"
+                    class="cm-rgb-slider"
+                    oninput="previewNewColorDot()"
+                  /><span class="cm-rgb-val" id="new-color-bv">128</span>
+                  <span
+                    class="cm-color-dot"
+                    id="new-color-dot"
+                    style="background: rgb(128, 128, 128)"
+                  ></span>
+                  <span
+                    id="new-color-hex"
+                    style="font-size: 0.75rem; font-family: monospace"
+                    >#808080</span
+                  >
+                </div>
+                <div class="cm-img-row" style="margin-top: 0.4rem">
+                  <label class="cm-img-label">Color image:</label>
+                  <input
+                    type="file"
+                    id="new-color-image"
+                    accept="image/*"
+                    style="font-size: 0.75rem"
+                  />
+                  <span
+                    id="new-color-img-name"
+                    style="font-size: 0.75rem; color: var(--text-secondary)"
+                  ></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions-row" style="margin-top: 1.5rem">
+              <button
+                type="button"
+                class="btn-secondary"
+                onclick="closeEditProduct()"
+                style="margin-right: 0.5rem"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Footer -->
+    <footer id="footer-section" class="footer-section">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-logo">
+            Jodhan Silk Store
+            <p
+              style="
+                font-size: 0.85rem;
+                color: rgba(252, 251, 249, 0.5);
+                font-family: var(--font-sans);
+                margin-top: 0.5rem;
+              "
+            >
+              © 2026 Jodhan Silk Store. All rights reserved. Made for wedding &
+              luxury attire.
+            </p>
+          </div>
+          <div class="footer-links">
+            <div style="display: flex; flex-direction: column; gap: 0.5rem">
+              <span style="font-weight: 600; color: white"
+                >Boutique Address</span
+              >
+              <span>Jain Bhawan Road, near Raju Jeweller</span>
+              <span>Mullanpur Dakha, Ludhiana, Punjab</span>
+              <span>shop number 81</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem">
+              <span style="font-weight: 600; color: white"
+                >Contact Us for custom sizing</span
+              >
+              <span>Phone: +91 94786 00048</span>
+              <span>Email: igurindersingh1@gmail.com</span>
+              <button class="admin-portal-trigger" onclick="openAdminLogin()">
+                Admin Portal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- SLIDING CART DRAWER -->
+    <div
+      class="cart-drawer-overlay"
+      id="cart-overlay"
+      onclick="closeCartDrawer()"
+    ></div>
+    <div class="cart-drawer" id="cart-drawer">
+      <div class="cart-drawer-header">
+        <h3>Shopping Bag</h3>
+        <button class="close-cart-btn" onclick="closeCartDrawer()">
+          &times;
+        </button>
+      </div>
+      <div id="cart-items-container">
+        <!-- Populated by JavaScript -->
+      </div>
+      <div class="cart-drawer-footer">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="cart-subtotal">₹0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping & Taxes</span>
+          <span>Calculated at checkout</span>
+        </div>
+        <div class="summary-row total-row">
+          <span>Total</span>
+          <span id="cart-total">₹0.00</span>
+        </div>
+        <button
+          class="btn-primary"
+          style="margin-top: 0.5rem"
+          onclick="openCheckout()"
+        >
+          Proceed to Checkout
+        </button>
+      </div>
+    </div>
+
+    <!-- QUICK VIEW MODAL Overlay -->
+    <div class="modal-overlay" id="quick-view-modal">
+      <div class="modal-container" style="max-width: 900px">
+        <button class="modal-close-btn" onclick="closeQuickView()">
+          &times;
+        </button>
+        <div
+          class="modal-body-content"
+          style="max-height: 80vh; overflow-y: auto; padding: 1.5rem 2rem"
+        >
+          <!-- Filled dynamically by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- STREAMLINED GUEST CHECKOUT MODAL -->
+    <div class="modal-overlay" id="checkout-modal">
+      <div class="modal-container" style="max-width: 700px">
+        <button class="modal-close-btn" onclick="closeCheckout()">
+          &times;
+        </button>
+
+        <div
+          class="checkout-modal-header-simple"
+          style="
+            padding: 2rem 3rem 1rem 3rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+          "
+        >
+          <h3>Secure Checkout</h3>
+          <p
+            style="
+              font-size: 0.9rem;
+              color: var(--text-secondary);
+              margin-top: 0.5rem;
+            "
+          >
+            Please enter your details below to complete your order. No account
+            required.
+          </p>
+        </div>
+
+        <div
+          class="checkout-modal-body-wrapper"
+          id="checkout-modal-body"
+          style="
+            padding: 2rem 3rem 3rem 3rem;
+            max-height: 70vh;
+            overflow-y: auto;
+          "
+        >
+          <form onsubmit="handlePaymentSubmit(event)">
+            <div class="billing-details-box">
+              <h4>Contact & Shipping Info</h4>
+              <div class="grid-cols-2">
+                <div class="form-group">
+                  <label for="checkout-name">Full Name *</label>
+                  <input
+                    type="text"
+                    id="checkout-name"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="checkout-email">Email Address *</label>
+                  <input
+                    type="email"
+                    id="checkout-email"
+                    placeholder="john.doe@example.com"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="grid-cols-2">
+                <div class="form-group">
+                  <label for="ship-street">Street Address *</label>
+                  <input
+                    type="text"
+                    id="ship-street"
+                    placeholder="123 Palace Marg"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="ship-city">City *</label>
+                  <input
+                    type="text"
+                    id="ship-city"
+                    placeholder="Ludhiana"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="grid-cols-2">
+                <div class="form-group">
+                  <label for="ship-zip">Zip/Postal Code *</label>
+                  <input
+                    type="text"
+                    id="ship-zip"
+                    placeholder="141101"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="ship-country">Shipping Country</label>
+                  <input
+                    type="text"
+                    id="ship-country"
+                    readonly
+                    style="
+                      opacity: 0.7;
+                      cursor: not-allowed;
+                      background: var(--bg-tertiary);
+                    "
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="billing-details-box">
+              <h4>Payment Method</h4>
+              <div
+                class="payment-method-toggle"
+                role="tablist"
+                aria-label="Payment method"
+              >
+                <button
+                  type="button"
+                  class="payment-method-btn active"
+                  id="pay-method-card"
+                  onclick="switchCheckoutPaymentMethod('card')"
+                >
+                  Credit / Debit Card
+                </button>
+                <button
+                  type="button"
+                  class="payment-method-btn"
+                  id="pay-method-bank"
+                  onclick="switchCheckoutPaymentMethod('bankbarcode')"
+                >
+                  Bank Transfer / UPI
+                </button>
+              </div>
+              <p class="checkout-payout-note" id="checkout-payout-note"></p>
+            </div>
+
+            <div id="checkout-card-section" class="billing-details-box">
+              <h4>Card Payment Details</h4>
+
+              <div class="form-group">
+                <label for="card-num">Credit Card Number *</label>
+                <input
+                  type="text"
+                  id="card-num"
+                  placeholder="xxxx xxxx xxxx xxxx"
+                  pattern="\d{16}"
+                  title="16 digit card number"
+                  maxlength="16"
+                  required
+                />
+              </div>
+
+              <div class="grid-cols-2">
+                <div class="form-group">
+                  <label for="card-expiry">Expiry Date (MM/YY) *</label>
+                  <input
+                    type="text"
+                    id="card-expiry"
+                    placeholder="12/29"
+                    pattern="(0[1-9]|1[0-2])\/\d{2}"
+                    title="MM/YY format"
+                    maxlength="5"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="card-cvv">CVV Code *</label>
+                  <input
+                    type="password"
+                    id="card-cvv"
+                    placeholder="•••"
+                    pattern="\d{3}"
+                    title="3 digit security code"
+                    maxlength="3"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="card-name">Cardholder Name *</label>
+                <input
+                  type="text"
+                  id="card-name"
+                  placeholder="John Doe"
+                  required
+                />
+              </div>
+            </div>
+
+            <div
+              id="checkout-bank-section"
+              class="billing-details-box"
+              style="display: none"
+            >
+              <h4>Pay with Bank Barcode / UPI</h4>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 1rem;
+                "
+              >
+                Scan the barcode / QR code below with any UPI app (Google Pay,
+                PhonePe, Paytm), then confirm once paid.
+              </p>
+              <div class="gpay-qr-checkout-wrap">
+                <div id="checkout-bank-qr-wrap" class="gpay-qr-checkout-image">
+                  <span>Barcode / QR not configured yet</span>
+                </div>
+                <div class="gpay-qr-checkout-meta">
+                  <p>
+                    Amount due: <strong id="checkout-bank-amount">₹0</strong>
+                  </p>
+                  <p
+                    id="checkout-bank-upi-label"
+                    style="font-size: 0.85rem; color: var(--text-secondary)"
+                  ></p>
+                  <button
+                    type="button"
+                    class="btn-primary"
+                    id="confirm-bank-payment-btn"
+                    onclick="handleBankBarcodePaymentConfirm()"
+                  >
+                    I Have Completed Payment
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p class="checkout-demo-note" id="checkout-demo-note">
+              Demo storefront: card payments are simulated locally. Bank barcode
+              / UPI checkout uses the uploaded QR code. Completed orders are
+              recorded in your admin payout ledger; connect a live payment
+              gateway to charge real cards or transfer real funds.
+            </p>
+
+            <button
+              type="submit"
+              class="btn-primary"
+              id="submit-payment-btn"
+              style="margin-top: 1rem"
+            >
+              Complete Secure Payment
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER LOGIN / SIGN UP MODAL -->
+    <div class="modal-overlay" id="auth-modal">
+      <div class="modal-container" style="max-width: 720px">
+        <button class="modal-close-btn" onclick="closeAuthModal()">
+          &times;
+        </button>
+        <div
+          class="checkout-modal-header-simple"
+          style="
+            padding: 2rem 3rem 1rem 3rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+          "
+        >
+          <h3>Login or Create Account</h3>
+          <p
+            style="
+              font-size: 0.9rem;
+              color: var(--text-secondary);
+              margin-top: 0.5rem;
+            "
+          >
+            Sign in to save your details for faster checkout. No purchase
+            required.
+          </p>
+        </div>
+        <div style="padding: 2rem 3rem 3rem 3rem">
+          <div class="auth-choices-split">
+            <div class="auth-form-panel">
+              <h4>Sign In</h4>
+              <form onsubmit="handleUserLogin(event)">
+                <div class="form-group">
+                  <label for="login-email">Email Address</label>
+                  <input
+                    type="email"
+                    id="login-email"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn-primary">Sign In</button>
+              </form>
+            </div>
+            <div class="auth-form-panel">
+              <h4>Create Account</h4>
+              <form onsubmit="handleSignup(event)">
+                <div class="form-group">
+                  <label for="signup-name">Full Name</label>
+                  <input
+                    type="text"
+                    id="signup-name"
+                    placeholder="Your name"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="signup-email">Email Address</label>
+                  <input
+                    type="email"
+                    id="signup-email"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn-primary">
+                  Create Account
+                </button>
+              </form>
+            </div>
+          </div>
+          <div class="guest-prompt-row">
+            <button type="button" class="btn-text" onclick="closeAuthModal()">
+              Continue browsing without an account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HIDDEN SECURE ADMIN LOGIN MODAL -->
+    <div class="modal-overlay" id="admin-login-modal">
+      <div class="modal-container" style="max-width: 400px">
+        <button class="modal-close-btn" onclick="closeAdminLogin()">
+          &times;
+        </button>
+
+        <div class="modal-admin-login-layout">
+          <h3>Admin Authentication</h3>
+
+          <div id="admin-error-msg"></div>
+
+          <form onsubmit="handleAdminLogin(event)">
+            <div class="form-group">
+              <label for="admin-user">Admin Username</label>
+              <input type="text" id="admin-user" required />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem">
+              <label for="admin-pass">Security Password</label>
+              <input type="password" id="admin-pass" required />
+            </div>
+
+            <button type="submit" class="btn-primary" style="background: #111">
+              Verify Login
+            </button>
+            <p
+              style="
+                font-size: 9px;
+                color: var(--text-secondary);
+                text-align: center;
+                margin-top: 1.5rem;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+              "
+            >
+              Protected Area. Authorized personnel only.
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- COUNTRY SELECTION GATE OVERLAY -->
+    <div class="modal-overlay" id="country-gate-overlay" style="z-index: 500">
+      <div class="modal-container" style="max-width: 450px">
+        <button
+          class="modal-close-btn"
+          id="country-gate-close-btn"
+          onclick="closeCountryGate()"
+        >
+          &times;
+        </button>
+        <div
+          class="modal-admin-login-layout"
+          style="padding: 2.5rem 2rem; text-align: center"
+        >
+          <div
+            class="brand-logo"
+            style="
+              justify-content: center;
+              font-size: 2.2rem;
+              margin-bottom: 1.5rem;
+            "
+          >
+            Jodhan <span>Est. 1985</span>
+          </div>
+          <h3 style="font-size: 1.4rem; margin-bottom: 1rem">
+            Select Shipping Country
+          </h3>
+          <p
+            style="
+              font-size: 0.85rem;
+              color: var(--text-secondary);
+              margin-bottom: 2rem;
+              line-height: 1.5;
+            "
+          >
+            Welcome to Jodhan Silk Store. Please choose your shipping
+            destination to proceed to our boutique catalog.
+          </p>
+
+          <form onsubmit="handleCountryGateSubmit(event)">
+            <div class="form-group" style="text-align: left">
+              <label for="gate-country-select">Shipping Destination</label>
+              <select id="gate-country-select" style="width: 100%" required>
+                <!-- Populated dynamically by JS -->
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              class="btn-primary"
+              style="margin-top: 1.5rem; width: 100%"
+            >
+              Explore Collection
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inline nuclear cleanup (runs before app.js) -->
+    <script>
+      (function () {
+        var k = [
+          "jodhan_products",
+          "jodhan_cart",
+          "jodhan_orders",
+          "jodhan_transactions",
+        ];
+        k.forEach(function (key) {
+          try {
+            var raw = localStorage.getItem(key);
+            if (!raw) return;
+            var data = JSON.parse(raw);
+            if (!Array.isArray(data)) return;
+            var before = data.length;
+            data = data.filter(function (item) {
+              var t = ((item.title || item.name || "") + "")
+                .toLowerCase()
+                .trim();
+              return (
+                t.indexOf("e prince jodhan") === -1 &&
+                t.indexOf("p prince jodhan") === -1 &&
+                t !== "e prince jodhan" &&
+                t !== "p prince jodhan"
+              );
+            });
+            if (data.length !== before)
+              localStorage.setItem(key, JSON.stringify(data));
+          } catch (e) {}
+        });
+        console.log("INLINE CLEANUP DONE");
+      })();
+    </script>
+    <script src="app.js?v=3"></script>
+  </body>
+</html>
