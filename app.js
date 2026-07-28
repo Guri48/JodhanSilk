@@ -224,6 +224,8 @@ let cart = [];
 let currentUser = null;
 let currentCategory = "all";
 let adminMode = false;
+let adminRole = "guest";
+let managers = [];
 
 // New country and banking states
 let countries = [];
@@ -385,6 +387,19 @@ function initApp() {
   } else {
     categories = [...DEFAULT_CATEGORIES];
     localStorage.setItem("jodhan_categories", JSON.stringify(categories));
+  }
+
+  // Load managers
+  const storedManagers = localStorage.getItem("jodhan_managers");
+  if (storedManagers) {
+    managers = JSON.parse(storedManagers);
+  } else {
+    managers = [];
+    localStorage.setItem("jodhan_managers", JSON.stringify(managers));
+  }
+
+  if (localStorage.getItem("jodhan_credit_card_enabled") === null) {
+    localStorage.setItem("jodhan_credit_card_enabled", "yes");
   }
 
   const storedBarcode = localStorage.getItem("jodhan_bank_barcode");
@@ -1210,7 +1225,190 @@ window.deleteCategory = function(categoryName) {
   showToast(`Deleted category: ${formatCategoryLabel(categoryName)}`);
 };
 
+const SUPER_ADMIN_USERNAME = "prince";
+
+function isCreditCardEnabled() {
+  return localStorage.getItem("jodhan_credit_card_enabled") !== "no";
+}
+
+function saveManagers() {
+  localStorage.setItem("jodhan_managers", JSON.stringify(managers));
+}
+
+function renderAdminCreditCardSettings() {
+  if (adminRole !== "admin") return;
+  const select = document.getElementById("admin-credit-card-status");
+  if (select) select.value = isCreditCardEnabled() ? "yes" : "no";
+}
+
+window.handleCreditCardStatusChange = function(value) {
+  if (adminRole !== "admin") {
+    showToast("Only the main admin can change credit card settings.");
+    return;
+  }
+  localStorage.setItem("jodhan_credit_card_enabled", value === "no" ? "no" : "yes");
+  renderCheckoutPaymentUI();
+  showToast(value === "no"
+    ? "Credit card checkout disabled. Customers will see WhatsApp order instructions."
+    : "Credit card checkout enabled.");
+};
+
+function renderAdminManagers() {
+  if (adminRole !== "admin") return;
+  const tbody = document.getElementById("admin-managers-list");
+  if (!tbody) return;
+
+  if (managers.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center;">No manager accounts yet. Create one using the form on the left.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = managers.map((mgr, index) => {
+    const isActive = mgr.enabled !== false;
+    return `
+      <tr>
+        <td>${escapeHtml(mgr.username)}</td>
+        <td>
+          <div class="manager-password-cell">
+            <span class="manager-password-value" id="mgr-pass-${index}">••••••••</span>
+            <button type="button" class="btn-show-password" data-showing="false" onclick="toggleManagerPasswordVisibility(${index}, this)">Show</button>
+          </div>
+        </td>
+        <td>${isActive ? '<span class="info-badge" style="background:#dcfce7;color:#166534;">Active</span>' : '<span class="info-badge">Disabled</span>'}</td>
+        <td style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" onclick="toggleManagerEnabled(${index})">${isActive ? "Disable" : "Enable"}</button>
+          <button type="button" class="btn-delete" onclick="deleteManager(${index})">Delete</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+window.toggleNewManagerPasswordVisibility = function(btn) {
+  const input = document.getElementById("new-manager-pass");
+  if (!input || !btn) return;
+  const showing = input.type === "text";
+  input.type = showing ? "password" : "text";
+  btn.textContent = showing ? "Show" : "Hide";
+};
+
+window.toggleManagerPasswordVisibility = function(index, btn) {
+  const mgr = managers[index];
+  const span = document.getElementById(`mgr-pass-${index}`);
+  if (!mgr || !span || !btn) return;
+
+  const showing = btn.dataset.showing === "true";
+  if (showing) {
+    span.textContent = "••••••••";
+    btn.textContent = "Show";
+    btn.dataset.showing = "false";
+  } else {
+    span.textContent = mgr.password;
+    btn.textContent = "Hide";
+    btn.dataset.showing = "true";
+  }
+};
+
+function resetNewManagerPasswordField() {
+  const input = document.getElementById("new-manager-pass");
+  const toggleBtn = document.querySelector("#create-manager-form .btn-show-password");
+  if (input) input.type = "password";
+  if (toggleBtn) toggleBtn.textContent = "Show";
+}
+
+window.handleCreateManager = function(e) {
+  e.preventDefault();
+  if (adminRole !== "admin") {
+    showToast("Only the main admin can create manager accounts.");
+    return;
+  }
+
+  const username = document.getElementById("new-manager-user")?.value.trim();
+  const password = document.getElementById("new-manager-pass")?.value.trim();
+
+  if (!username || !password) {
+    showToast("Please enter a username and password.");
+    return;
+  }
+
+  if (username.length < 3) {
+    showToast("Username must be at least 3 characters.");
+    return;
+  }
+
+  if (username.toLowerCase() === SUPER_ADMIN_USERNAME) {
+    showToast("This username is reserved for the main admin account.");
+    return;
+  }
+
+  if (managers.some(mgr => mgr.username.toLowerCase() === username.toLowerCase())) {
+    showToast("A manager with this username already exists.");
+    return;
+  }
+
+  managers.push({
+    id: "mgr-" + Date.now(),
+    username,
+    password,
+    enabled: true,
+    createdAt: Date.now()
+  });
+
+  saveManagers();
+  document.getElementById("create-manager-form")?.reset();
+  resetNewManagerPasswordField();
+  renderAdminManagers();
+  showToast(`Manager account "${username}" created. They can only access the inventory catalog.`);
+};
+
+window.toggleManagerEnabled = function(index) {
+  if (adminRole !== "admin") return;
+  const mgr = managers[index];
+  if (!mgr) return;
+
+  mgr.enabled = mgr.enabled === false;
+  saveManagers();
+  renderAdminManagers();
+  showToast(`Manager "${mgr.username}" ${mgr.enabled ? "enabled" : "disabled"}.`);
+};
+
+window.deleteManager = function(index) {
+  if (adminRole !== "admin") return;
+  const mgr = managers[index];
+  if (!mgr) return;
+
+  if (!confirm(`Delete manager account "${mgr.username}"?`)) return;
+
+  managers.splice(index, 1);
+  saveManagers();
+  renderAdminManagers();
+  showToast(`Manager "${mgr.username}" deleted.`);
+};
+
+function applyManagerInventoryRestrictions() {
+  const isManager = adminRole === "manager";
+  const isSuperAdmin = adminRole === "admin";
+
+  const titleEl = document.getElementById("admin-panel-title");
+  const subtitleEl = document.getElementById("admin-panel-subtitle");
+  if (titleEl) {
+    titleEl.textContent = isManager ? "Inventory Manager Panel" : "Main Admin Control Panel";
+  }
+  if (subtitleEl) {
+    subtitleEl.textContent = isManager
+      ? "You can add and edit suits, update stock, manage colors, and change availability. Other admin settings are restricted to the main admin."
+      : "Full store control: inventory, categories, countries, orders, payouts, manager accounts, and credit card settings.";
+  }
+
+  const wipeBtn = document.querySelector("button[onclick=\"wipeBadItems()\"]");
+  if (wipeBtn) wipeBtn.style.display = isSuperAdmin ? "" : "none";
+}
+
 window.switchAdminTab = function(tabId) {
+  if (adminRole === "manager" && tabId !== "inventory") {
+    tabId = "inventory";
+  }
+
   activeAdminTab = tabId;
 
   document.querySelectorAll(".admin-tab-btn").forEach(btn => btn.classList.remove("active"));
@@ -1242,6 +1440,10 @@ window.switchAdminTab = function(tabId) {
       switchPayoutFormType(payoutFormType);
       renderBankAccountsGrid();
       renderTransactionsList();
+      renderAdminCreditCardSettings();
+      break;
+    case "managers":
+      renderAdminManagers();
       break;
     default:
       break;
@@ -1764,6 +1966,18 @@ function renderCheckoutBarcodePreview() {
   }
 }
 
+function toggleCardFieldsRequired(isRequired) {
+  const cardNum = document.getElementById("card-num");
+  const cardExpiry = document.getElementById("card-expiry");
+  const cardCvv = document.getElementById("card-cvv");
+  const cardName = document.getElementById("card-name");
+  
+  if (cardNum) cardNum.required = isRequired;
+  if (cardExpiry) cardExpiry.required = isRequired;
+  if (cardCvv) cardCvv.required = isRequired;
+  if (cardName) cardName.required = isRequired;
+}
+
 function renderCheckoutPaymentUI() {
   const cardSection = document.getElementById("checkout-card-section");
   const bankSection = document.getElementById("checkout-bank-section");
@@ -1775,7 +1989,28 @@ function renderCheckoutPaymentUI() {
   const isBarcode = checkoutPaymentMethod === "bankbarcode";
   if (cardSection) cardSection.style.display = isBarcode ? "none" : "block";
   if (bankSection) bankSection.style.display = isBarcode ? "block" : "none";
-  if (submitBtn) submitBtn.style.display = isBarcode ? "none" : "inline-flex";
+
+  const isCcEnabled = isCreditCardEnabled();
+  const cardFields = document.getElementById("checkout-card-fields");
+  const cardDisabledMsg = document.getElementById("checkout-card-disabled-msg");
+
+  if (!isBarcode) {
+    if (isCcEnabled) {
+      if (cardFields) cardFields.style.display = "block";
+      if (cardDisabledMsg) cardDisabledMsg.style.display = "none";
+      toggleCardFieldsRequired(true);
+      if (submitBtn) submitBtn.style.display = "inline-flex";
+    } else {
+      if (cardFields) cardFields.style.display = "none";
+      if (cardDisabledMsg) cardDisabledMsg.style.display = "block";
+      toggleCardFieldsRequired(false);
+      if (submitBtn) submitBtn.style.display = "none";
+    }
+  } else {
+    toggleCardFieldsRequired(false);
+    if (submitBtn) submitBtn.style.display = "none";
+  }
+
   if (cardBtn) cardBtn.classList.toggle("active", !isBarcode);
   if (bankBtn) bankBtn.classList.toggle("active", isBarcode);
 
@@ -1957,6 +2192,11 @@ window.handlePaymentSubmit = async function(e) {
     return;
   }
 
+  if (!isCreditCardEnabled()) {
+    showToast("Credit card payments are unavailable. Please order via WhatsApp.");
+    return;
+  }
+
   const checkoutName = document.getElementById("checkout-name")?.value.trim();
   const checkoutEmail = document.getElementById("checkout-email")?.value.trim();
   if (!currentUser && checkoutName && checkoutEmail) {
@@ -2042,12 +2282,25 @@ window.closeAdminLogin = function() {
 
 window.handleAdminLogin = function(e) {
   e.preventDefault();
-  const user = document.getElementById("admin-user").value;
-  const pass = document.getElementById("admin-pass").value;
+  const user = document.getElementById("admin-user").value.trim();
+  const pass = document.getElementById("admin-pass").value.trim();
   const errorMsg = document.getElementById("admin-error-msg");
 
-  if (user === "prince" && pass === "silk_store") {
+  const matchingManager = managers.find(m => m.username.toLowerCase() === user.toLowerCase() && m.password === pass && m.enabled !== false);
+  const disabledManager = managers.find(m => m.username.toLowerCase() === user.toLowerCase() && m.password === pass && m.enabled === false);
+
+  if (user.toLowerCase() === SUPER_ADMIN_USERNAME && pass === "silk_store") {
     adminMode = true;
+    adminRole = "admin";
+    errorMsg.style.display = "none";
+    closeAdminLogin();
+    activateAdminDashboard();
+  } else if (disabledManager) {
+    errorMsg.style.display = "block";
+    errorMsg.innerText = "This manager account has been disabled by the main admin.";
+  } else if (matchingManager) {
+    adminMode = true;
+    adminRole = "manager";
     errorMsg.style.display = "none";
     closeAdminLogin();
     activateAdminDashboard();
@@ -2057,17 +2310,42 @@ window.handleAdminLogin = function(e) {
   }
 };
 
+function configureAdminDashboardTabs() {
+  const isSuperAdmin = (adminRole === "admin");
+  
+  const btnCategories = document.getElementById("btn-tab-categories");
+  const btnCountries = document.getElementById("btn-tab-countries");
+  const btnBanking = document.getElementById("btn-tab-banking");
+  const btnOrders = document.getElementById("btn-tab-orders");
+  const btnManagers = document.getElementById("btn-tab-managers");
+  
+  if (btnCategories) btnCategories.style.display = isSuperAdmin ? "" : "none";
+  if (btnCountries) btnCountries.style.display = isSuperAdmin ? "" : "none";
+  if (btnBanking) btnBanking.style.display = isSuperAdmin ? "" : "none";
+  if (btnOrders) btnOrders.style.display = isSuperAdmin ? "" : "none";
+  if (btnManagers) btnManagers.style.display = isSuperAdmin ? "" : "none";
+
+  applyManagerInventoryRestrictions();
+}
+
 // Toggles Admin Dashboard View
 function activateAdminDashboard() {
   document.getElementById("customer-storefront-view").style.display = "none";
   document.getElementById("admin-dashboard-view").style.display = "block";
   window.scrollTo(0, 0);
 
-  switchAdminTab(activeAdminTab || "inventory");
+  configureAdminDashboardTabs();
+
+  if (adminRole === "manager") {
+    switchAdminTab("inventory");
+  } else {
+    switchAdminTab(activeAdminTab || "inventory");
+  }
 }
 
 window.exitAdminMode = function() {
   adminMode = false;
+  adminRole = "guest";
   document.getElementById("admin-dashboard-view").style.display = "none";
   document.getElementById("customer-storefront-view").style.display = "block";
   window.scrollTo(0, 0);

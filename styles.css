@@ -2184,6 +2184,43 @@ a {
   border-color: #ef4444;
 }
 
+.password-input-wrap,
+.manager-password-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.password-input-wrap input {
+  flex: 1;
+  min-width: 0;
+}
+
+.manager-password-value {
+  font-family: monospace;
+  font-size: 0.9rem;
+  min-width: 5rem;
+}
+
+.btn-show-password {
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  white-space: nowrap;
+}
+
+.btn-show-password:hover {
+  border-color: var(--accent-gold-dark);
+  color: var(--text-primary);
+}
+
 /* Admin error messages */
 #admin-error-msg {
   display: none;
