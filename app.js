@@ -219,6 +219,8 @@ function getColorCSS(name) {
   const lower = name.toLowerCase().trim();
   return map[lower] || map["default"];
 }
+const API_BASE = ''; // same-origin when deployed via Worker
+let sessionToken = localStorage.getItem("jodhan_session_token") || null;
 let products = [];
 let cart = [];
 let currentUser = null;
@@ -330,6 +332,10 @@ function initApp() {
   if (storedUser) {
     currentUser = JSON.parse(storedUser);
     updateUserSessionUI();
+  }
+  // Verify session token if present
+  if (sessionToken) {
+    verifySessionToken();
   }
 
   // Load countries
@@ -2050,31 +2056,81 @@ window.handleGuestCheckout = function(e) {
   closeAuthModal();
 };
 
-window.handleSignup = function(e) {
+window.handleSignup = async function(e) {
   e.preventDefault();
   const name = document.getElementById("signup-name").value;
   const email = document.getElementById("signup-email").value;
-
-  currentUser = { name: name, email: email, isGuest: false };
-  localStorage.setItem("jodhan_user", JSON.stringify(currentUser));
-  updateUserSessionUI();
-  closeAuthModal();
+  const password = document.getElementById("signup-password").value;
+  try {
+    const res = await fetch(API_BASE + '/api/auth/customer/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      sessionToken = data.token;
+      localStorage.setItem("jodhan_session_token", data.token);
+      currentUser = { name: data.name, email: data.email, isGuest: false };
+      localStorage.setItem("jodhan_user", JSON.stringify(currentUser));
+      updateUserSessionUI();
+      closeAuthModal();
+    } else {
+      alert(data.error || 'Registration failed');
+    }
+  } catch(e) {
+    // Fallback: save locally if API unreachable
+    currentUser = { name, email, isGuest: false };
+    localStorage.setItem("jodhan_user", JSON.stringify(currentUser));
+    updateUserSessionUI();
+    closeAuthModal();
+  }
 };
 
-window.handleUserLogin = function(e) {
+window.handleUserLogin = async function(e) {
   e.preventDefault();
   const email = document.getElementById("login-email").value;
-
-  currentUser = { name: email.split('@')[0], email: email, isGuest: false };
-  localStorage.setItem("jodhan_user", JSON.stringify(currentUser));
-  updateUserSessionUI();
-  closeAuthModal();
+  const password = document.getElementById("login-password").value;
+  try {
+    const res = await fetch(API_BASE + '/api/auth/customer/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      sessionToken = data.token;
+      localStorage.setItem("jodhan_session_token", data.token);
+      currentUser = { name: data.name, email: data.email, isGuest: false };
+      localStorage.setItem("jodhan_user", JSON.stringify(currentUser));
+      updateUserSessionUI();
+      closeAuthModal();
+      return;
+    }
+    // Fall through to localStorage fallback if API returned error
+  } catch(e) {
+    console.log("Customer login API error, falling back to localStorage:", e.message);
+  }
+  // Fallback: check localStorage for existing session
+  const storedUser = localStorage.getItem("jodhan_user");
+  if (storedUser) {
+    const u = JSON.parse(storedUser);
+    if (u.email === email) {
+      currentUser = u;
+      updateUserSessionUI();
+      closeAuthModal();
+      return;
+    }
+  }
+  alert('Invalid credentials. Try again or create a new account.');
 };
 
 // Sign Out Customer
 window.customerLogout = function() {
   currentUser = null;
+  sessionToken = null;
   localStorage.removeItem("jodhan_user");
+  localStorage.removeItem("jodhan_session_token");
   updateUserSessionUI();
 };
 
@@ -2093,6 +2149,34 @@ function updateUserSessionUI() {
       <button class="btn-text" onclick="openAuthModal()">Login / Sign Up</button>
     `;
   }
+}
+
+// Verify session token with D1 Worker API
+async function verifySessionToken() {
+  try {
+    const res = await fetch(API_BASE + '/api/auth/verify', {
+      headers: { 'Authorization': 'Bearer ' + sessionToken }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.valid) {
+        if (data.type === 'admin') {
+          adminMode = true;
+          adminRole = 'admin';
+          currentUser = { name: data.username, email: '', isGuest: false };
+        } else {
+          adminMode = false;
+          currentUser = { name: data.name, email: data.email, isGuest: false };
+        }
+        localStorage.setItem("jodhan_user", JSON.stringify(currentUser));
+        updateUserSessionUI();
+        return;
+      }
+    }
+  } catch(e) { console.log("Session verify error:", e); }
+  // Token invalid or network error — clear it
+  sessionToken = null;
+  localStorage.removeItem("jodhan_session_token");
 }
 
 // Auth modal helper
@@ -2280,22 +2364,61 @@ window.closeAdminLogin = function() {
   }
 };
 
-window.handleAdminLogin = function(e) {
+window.handleAdminLogin = async function(e) {
   e.preventDefault();
   const user = document.getElementById("admin-user").value.trim();
   const pass = document.getElementById("admin-pass").value.trim();
   const errorMsg = document.getElementById("admin-error-msg");
 
-  const matchingManager = managers.find(m => m.username.toLowerCase() === user.toLowerCase() && m.password === pass && m.enabled !== false);
-  const disabledManager = managers.find(m => m.username.toLowerCase() === user.toLowerCase() && m.password === pass && m.enabled === false);
+  // If deployed locally / file://, fall back to hardcoded check
+  if (window.location.protocol === 'file:') {
+    if (user.toLowerCase() === "prince" && pass === "silk_store") {
+      adminMode = true;
+      adminRole = "admin";
+      errorMsg.style.display = "none";
+      closeAdminLogin();
+      activateAdminDashboard();
+    } else {
+      errorMsg.style.display = "block";
+      errorMsg.innerText = "Invalid credentials. Try again.";
+    }
+    return;
+  }
 
-  if (user.toLowerCase() === SUPER_ADMIN_USERNAME && pass === "silk_store") {
+  try {
+    const res = await fetch(API_BASE + '/api/auth/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass })
+    });
+    const data = await res.json();
+    if (data.success) {
+      sessionToken = data.token;
+      localStorage.setItem("jodhan_session_token", data.token);
+      adminMode = true;
+      adminRole = "admin";
+      errorMsg.style.display = "none";
+      closeAdminLogin();
+      activateAdminDashboard();
+      return;
+    }
+    // Fall through to localStorage fallback
+  } catch(e) {
+    console.log("Admin login API error, falling back to localStorage:", e.message);
+  }
+
+  // Fallback: check localStorage managers and hardcoded admin
+  if (user.toLowerCase() === "prince" && pass === "silk_store") {
     adminMode = true;
     adminRole = "admin";
     errorMsg.style.display = "none";
     closeAdminLogin();
     activateAdminDashboard();
-  } else if (disabledManager) {
+    return;
+  }
+  const matchingManager = managers.find(m => m.username.toLowerCase() === user.toLowerCase() && m.password === pass && m.enabled !== false);
+  const disabledManager = managers.find(m => m.username.toLowerCase() === user.toLowerCase() && m.password === pass && m.enabled === false);
+  if (disabledManager) {
     errorMsg.style.display = "block";
     errorMsg.innerText = "This manager account has been disabled by the main admin.";
   } else if (matchingManager) {
@@ -2346,6 +2469,10 @@ function activateAdminDashboard() {
 window.exitAdminMode = function() {
   adminMode = false;
   adminRole = "guest";
+  if (sessionToken) {
+    sessionToken = null;
+    localStorage.removeItem("jodhan_session_token");
+  }
   document.getElementById("admin-dashboard-view").style.display = "none";
   document.getElementById("customer-storefront-view").style.display = "block";
   window.scrollTo(0, 0);

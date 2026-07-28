@@ -1,14 +1,19 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "jodhansilk",
+  "main": "src/worker.js",
   "compatibility_date": "2026-07-28",
   "assets": {
     "directory": ".",
-    "exclude": [
-      "node_modules/**",
-      ".git/**",
-      ".wrangler/**"
-    ]
-  }
+    "binding": "ASSETS",
+    "exclude": ["node_modules/**", ".wrangler/**", "npm-cache/**", ".git/**", "**/*.sqlite*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "jodhan_auth",
+      "database_name": "jodhan-auth",
+      "database_id": "12bddd5b-1005-41fc-b83d-958bbc93be76"
+    }
+  ]
 }
 

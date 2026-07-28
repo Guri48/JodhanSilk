@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const Stripe = require('stripe');
 
 const app = express();
@@ -9,6 +10,7 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
 const paymentsFile = path.join(__dirname, 'payments.json');
+const authFile = path.join(__dirname, 'auth.json');
 const publicDir = __dirname;
 
 function loadPayments() {
@@ -28,6 +30,27 @@ function loadPayments() {
 
 function savePayments(payments) {
   fs.writeFileSync(paymentsFile, JSON.stringify(payments, null, 2));
+}
+
+function loadAuth() {
+  try {
+    if (!fs.existsSync(authFile)) {
+      const defaultAuth = {
+        admin_users: [{ id: 1, username: 'prince', password: 'silk_store' }],
+        customer_users: [],
+        sessions: []
+      };
+      fs.writeFileSync(authFile, JSON.stringify(defaultAuth, null, 2));
+      return defaultAuth;
+    }
+    return JSON.parse(fs.readFileSync(authFile, 'utf8'));
+  } catch {
+    return { admin_users: [{ id: 1, username: 'prince', password: 'silk_store' }], customer_users: [], sessions: [] };
+  }
+}
+
+function saveAuth(auth) {
+  fs.writeFileSync(authFile, JSON.stringify(auth, null, 2));
 }
 
 function recordPayment(session, source = 'webhook') {
@@ -81,6 +104,63 @@ app.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhookHan
 app.post('/api/webhook', express.raw({ type: 'application/json' }), stripeWebhookHandler);
 
 app.use(express.json({ limit: '1mb' }));
+
+// ---- Auth API (local JSON-backed, mirrors D1 Worker endpoints) ----
+
+app.post('/api/auth/admin/login', (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) return res.status(400).json({ error: 'Missing credentials' });
+  const auth = loadAuth();
+  const user = auth.admin_users.find(u => u.username === username && u.password === password);
+  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+  const token = crypto.randomUUID();
+  auth.sessions.push({ token, user_type: 'admin', user_id: user.id });
+  saveAuth(auth);
+  res.json({ success: true, token, username });
+});
+
+app.post('/api/auth/customer/register', (req, res) => {
+  const { name, email, password } = req.body || {};
+  if (!name || !email || !password) return res.status(400).json({ error: 'Missing fields' });
+  const auth = loadAuth();
+  if (auth.customer_users.find(u => u.email === email)) return res.status(409).json({ error: 'Email already registered' });
+  const id = auth.customer_users.length > 0 ? Math.max(...auth.customer_users.map(u => u.id)) + 1 : 1;
+  auth.customer_users.push({ id, name, email, password });
+  const token = crypto.randomUUID();
+  auth.sessions.push({ token, user_type: 'customer', user_id: id });
+  saveAuth(auth);
+  res.json({ success: true, token, name, email });
+});
+
+app.post('/api/auth/customer/login', (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
+  const auth = loadAuth();
+  const user = auth.customer_users.find(u => u.email === email && u.password === password);
+  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+  const token = crypto.randomUUID();
+  auth.sessions.push({ token, user_type: 'customer', user_id: user.id });
+  saveAuth(auth);
+  res.json({ success: true, token, name: user.name, email: user.email });
+});
+
+app.get('/api/auth/verify', (req, res) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) return res.status(401).json({ valid: false });
+  const auth = loadAuth();
+  const session = auth.sessions.find(s => s.token === token);
+  if (!session) return res.status(401).json({ valid: false });
+  if (session.user_type === 'admin') {
+    const user = auth.admin_users.find(u => u.id === session.user_id);
+    return res.json({ valid: true, type: 'admin', username: user?.username });
+  }
+  const user = auth.customer_users.find(u => u.id === session.user_id);
+  res.json({ valid: true, type: 'customer', name: user?.name, email: user?.email });
+});
+
+// ----
+
 app.use(express.static(publicDir));
 
 app.get('/api/payment-config', (req, res) => {
