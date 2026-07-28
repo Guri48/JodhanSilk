@@ -1,6 +1,5 @@
 node_modules/
+.npm/
 npm-cache/
-.wrangler/
-.dev.vars
-dist/
 .env
+.wrangler/
