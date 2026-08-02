@@ -242,14 +242,15 @@ let bankBarcodeImageBase64 = "";
 let livePaymentGatewayEnabled = false;
 
 // Currency system
-const CURRENCIES = {
-  INR: { symbol: "₹", rate: 1, label: "Indian Rupee" },
-  USD: { symbol: "$", rate: 0.012, label: "US Dollar" },
-  CAD: { symbol: "CA$", rate: 0.016, label: "Canadian Dollar" },
-  GBP: { symbol: "£", rate: 0.0094, label: "British Pound" },
-  EUR: { symbol: "€", rate: 0.011, label: "Euro" },
-  AED: { symbol: "د.إ", rate: 0.044, label: "UAE Dirham" }
+const DEFAULT_CURRENCIES = {
+  INR: { symbol: "₹", rate: 1, label: "Indian Rupee", country: "India", enabled: true },
+  USD: { symbol: "$", rate: 0.012, label: "US Dollar", country: "United States", enabled: true },
+  CAD: { symbol: "CA$", rate: 0.016, label: "Canadian Dollar", country: "Canada", enabled: true },
+  GBP: { symbol: "£", rate: 0.0094, label: "British Pound", country: "United Kingdom", enabled: true },
+  EUR: { symbol: "€", rate: 0.011, label: "Euro", country: "European Union", enabled: true },
+  AED: { symbol: "د.إ", rate: 0.044, label: "UAE Dirham", country: "United Arab Emirates", enabled: true }
 };
+let CURRENCIES = { ...DEFAULT_CURRENCIES };
 let selectedCurrency = "INR";
 let liveRates = null;
 let lastRateFetch = 0;
@@ -419,9 +420,8 @@ function initApp() {
     try {
       const parsed = JSON.parse(cachedRates);
       if (parsed && parsed.rates && parsed.fetched) {
-        const mapping = { USD: "USD", CAD: "CAD", GBP: "GBP", EUR: "EUR", AED: "AED" };
-        Object.keys(mapping).forEach(code => {
-          const rate = parsed.rates[mapping[code]];
+        Object.keys(CURRENCIES).forEach(code => {
+          const rate = parsed.rates[code];
           if (rate && CURRENCIES[code]) CURRENCIES[code].rate = rate;
         });
         liveRates = parsed.rates;
@@ -430,9 +430,12 @@ function initApp() {
     } catch(_) {}
   }
 
+  // Load currency config from localStorage
+  loadCurrencies();
+
   // Load selected currency
   const storedCurrency = localStorage.getItem("jodhan_currency");
-  if (storedCurrency && CURRENCIES[storedCurrency]) {
+  if (storedCurrency && CURRENCIES[storedCurrency] && CURRENCIES[storedCurrency].enabled !== false) {
     selectedCurrency = storedCurrency;
   }
 
@@ -460,6 +463,7 @@ function initApp() {
   renderProducts();
   renderCheckoutPaymentUI();
   updateNavbarCurrency();
+  renderCurrencySelect();
   ensureLivePaymentGatewayStatus();
   handleStripeReturnIfNeeded();
   updateCartBadge();
@@ -483,8 +487,51 @@ function updateNavbarCurrency() {
   if (sel) sel.value = selectedCurrency;
 }
 
+function saveCurrencies() {
+  localStorage.setItem("jodhan_currencies", JSON.stringify(CURRENCIES));
+}
+
+function loadCurrencies() {
+  const stored = localStorage.getItem("jodhan_currencies");
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      // Merge so newly-added default fields survive old stored data
+      const merged = {};
+      Object.keys(DEFAULT_CURRENCIES).forEach(code => {
+        merged[code] = { ...DEFAULT_CURRENCIES[code], ...(parsed[code] || {}) };
+      });
+      // Preserve any custom currencies the admin added
+      Object.keys(parsed).forEach(code => {
+        if (!merged[code]) merged[code] = parsed[code];
+      });
+      CURRENCIES = merged;
+      return;
+    } catch(_) {}
+  }
+  CURRENCIES = { ...DEFAULT_CURRENCIES };
+  saveCurrencies();
+}
+
+function renderCurrencySelect() {
+  const sel = document.getElementById("currency-select");
+  if (!sel) return;
+  sel.innerHTML = Object.keys(CURRENCIES)
+    .filter(code => CURRENCIES[code].enabled !== false)
+    .map(code => {
+      const cur = CURRENCIES[code];
+      return `<option value="${escapeHtml(code)}">${escapeHtml(cur.symbol)} ${escapeHtml(code)}</option>`;
+    })
+    .join("");
+  sel.value = selectedCurrency;
+  if (!CURRENCIES[selectedCurrency] || CURRENCIES[selectedCurrency].enabled === false) {
+    selectedCurrency = "INR";
+    sel.value = "INR";
+  }
+}
+
 window.switchCurrency = function(code) {
-  if (!CURRENCIES[code]) return;
+  if (!CURRENCIES[code] || CURRENCIES[code].enabled === false) return;
   selectedCurrency = code;
   localStorage.setItem("jodhan_currency", code);
   updateNavbarCurrency();
@@ -510,14 +557,14 @@ async function fetchLiveRates() {
     const res = await fetch("https://api.frankfurter.dev/latest?from=INR");
     const data = await res.json();
     if (data && data.rates) {
-      const mapping = { USD: "USD", CAD: "CAD", GBP: "GBP", EUR: "EUR", AED: "AED" };
-      Object.keys(mapping).forEach(code => {
-        const rate = data.rates[mapping[code]];
+      Object.keys(CURRENCIES).forEach(code => {
+        const rate = data.rates[code];
         if (rate && CURRENCIES[code]) CURRENCIES[code].rate = rate;
       });
       liveRates = data.rates;
       lastRateFetch = Date.now();
       localStorage.setItem("jodhan_live_rates", JSON.stringify({ rates: data.rates, fetched: lastRateFetch }));
+      renderAdminCurrenciesList();
     }
   } catch (_) {
     // Fall back to hardcoded rates silently
@@ -789,6 +836,133 @@ window.deleteCountry = function(name) {
   renderAdminCountriesList();
   populateCountrySelect(document.getElementById("gate-country-select"));
   showToast(`Removed ${name}.`);
+};
+
+// ===== Currency Management =====
+function renderAdminCurrenciesList() {
+  const tbody = document.getElementById("admin-currencies-list");
+  if (!tbody) return;
+
+  const codes = Object.keys(CURRENCIES);
+  if (codes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">No currencies configured.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = codes.map(code => {
+    const cur = CURRENCIES[code];
+    const isInr = code === "INR";
+    const enabled = cur.enabled !== false;
+    return `
+      <tr>
+        <td><strong>${escapeHtml(code)}</strong></td>
+        <td>${escapeHtml(cur.symbol)}</td>
+        <td>${escapeHtml(cur.label || "")}</td>
+        <td>${escapeHtml(cur.country || "")}</td>
+        <td>
+          <input
+            type="number"
+            min="0"
+            step="any"
+            value="${Number(cur.rate).toFixed(6)}"
+            data-code="${escapeHtml(code)}"
+            onchange="updateCurrencyRate(this.dataset.code, this.value)"
+            style="width: 110px; padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border-color); font-family: var(--font-sans); font-size: 0.85rem;"
+          />
+        </td>
+        <td>
+          ${isInr ? '<span style="font-size:0.8rem; color:var(--text-secondary);">Always on</span>'
+          : `<button type="button" class="${enabled ? 'btn-status' : 'btn-status-off'}" onclick="toggleCurrencyEnabled('${escapeHtml(code)}')">${enabled ? 'Enabled' : 'Disabled'}</button>
+             <button type="button" class="btn-delete" onclick="deleteCurrency('${escapeHtml(code)}')">Delete</button>`}
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+window.handleCreateCurrency = function(e) {
+  e.preventDefault();
+  const code = document.getElementById("new-currency-code").value.trim().toUpperCase();
+  const country = document.getElementById("new-currency-country").value.trim();
+  const label = document.getElementById("new-currency-label").value.trim();
+  const symbol = document.getElementById("new-currency-symbol").value.trim();
+  const rate = parseFloat(document.getElementById("new-currency-rate").value);
+
+  if (!code || !country || !symbol || isNaN(rate) || rate <= 0) {
+    showToast("Please fill in currency code, country, symbol and a valid exchange rate.");
+    return;
+  }
+  if (!/^[A-Z]{3}$/.test(code)) {
+    showToast("Currency code must be exactly 3 letters, e.g. CHF, JPY.");
+    return;
+  }
+  if (CURRENCIES[code]) {
+    showToast(`Currency ${code} already exists.`);
+    return;
+  }
+
+  CURRENCIES[code] = { symbol, rate, label: label || code, country, enabled: true };
+  saveCurrencies();
+  document.getElementById("add-currency-form").reset();
+  renderAdminCurrenciesList();
+  renderCurrencySelect();
+  showToast(`Added currency: ${code} (${country})`);
+};
+
+window.toggleCurrencyEnabled = function(code) {
+  if (!CURRENCIES[code] || code === "INR") return;
+  CURRENCIES[code].enabled = CURRENCIES[code].enabled === false ? true : false;
+  saveCurrencies();
+
+  // If the disabled currency was selected, fall back to INR
+  if (CURRENCIES[code].enabled === false && selectedCurrency === code) {
+    selectedCurrency = "INR";
+    localStorage.setItem("jodhan_currency", "INR");
+  }
+
+  renderAdminCurrenciesList();
+  renderCurrencySelect();
+  renderProducts();
+  renderNewArrivals();
+  renderCart();
+  updateNavbarCurrency();
+  showToast(`${code} ${CURRENCIES[code].enabled === false ? 'disabled' : 'enabled'}.`);
+};
+
+window.updateCurrencyRate = function(code, value) {
+  if (!CURRENCIES[code]) return;
+  const rate = parseFloat(value);
+  if (isNaN(rate) || rate <= 0) {
+    showToast("Exchange rate must be a positive number.");
+    renderAdminCurrenciesList();
+    return;
+  }
+  CURRENCIES[code].rate = rate;
+  saveCurrencies();
+  renderProducts();
+  renderNewArrivals();
+  renderCart();
+  renderCheckoutBarcodePreview();
+  renderActivePayoutBanner();
+  showToast(`${code} exchange rate updated to ${rate}.`);
+};
+
+window.deleteCurrency = function(code) {
+  if (!CURRENCIES[code] || code === "INR") return;
+  if (!confirm(`Remove ${code} from the store currencies?`)) return;
+  delete CURRENCIES[code];
+  if (selectedCurrency === code) {
+    selectedCurrency = "INR";
+    localStorage.setItem("jodhan_currency", "INR");
+  }
+  saveCurrencies();
+  renderAdminCurrenciesList();
+  renderCurrencySelect();
+  renderProducts();
+  renderNewArrivals();
+  renderCart();
+  updateNavbarCurrency();
+  showToast(`Removed ${code}.`);
 };
 
 function maskAccountNumber(accNo) {
@@ -1437,6 +1611,9 @@ window.switchAdminTab = function(tabId) {
       break;
     case "countries":
       renderAdminCountriesList();
+      break;
+    case "currencies":
+      renderAdminCurrenciesList();
       break;
     case "orders":
       cleanupOldCompletedOrders();
@@ -2438,12 +2615,14 @@ function configureAdminDashboardTabs() {
   
   const btnCategories = document.getElementById("btn-tab-categories");
   const btnCountries = document.getElementById("btn-tab-countries");
+  const btnCurrencies = document.getElementById("btn-tab-currencies");
   const btnBanking = document.getElementById("btn-tab-banking");
   const btnOrders = document.getElementById("btn-tab-orders");
   const btnManagers = document.getElementById("btn-tab-managers");
   
   if (btnCategories) btnCategories.style.display = isSuperAdmin ? "" : "none";
   if (btnCountries) btnCountries.style.display = isSuperAdmin ? "" : "none";
+  if (btnCurrencies) btnCurrencies.style.display = isSuperAdmin ? "" : "none";
   if (btnBanking) btnBanking.style.display = isSuperAdmin ? "" : "none";
   if (btnOrders) btnOrders.style.display = isSuperAdmin ? "" : "none";
   if (btnManagers) btnManagers.style.display = isSuperAdmin ? "" : "none";

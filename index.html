@@ -102,12 +102,7 @@
             class="currency-select"
             onchange="switchCurrency(this.value)"
           >
-            <option value="INR">₹ INR</option>
-            <option value="USD">$ USD</option>
-            <option value="CAD">CA$ CAD</option>
-            <option value="GBP">£ GBP</option>
-            <option value="EUR">€ EUR</option>
-            <option value="AED">د.إ AED</option>
+            <!-- Populated dynamically by renderCurrencySelect() -->
           </select>
           <span id="rate-status" class="rate-status" title="Exchange rates"
             >Live</span
@@ -255,6 +250,13 @@
             onclick="switchAdminTab('countries')"
           >
             Manage Countries
+          </button>
+          <button
+            class="admin-tab-btn"
+            id="btn-tab-currencies"
+            onclick="switchAdminTab('currencies')"
+          >
+            Manage Currencies
           </button>
           <button
             class="admin-tab-btn"
@@ -553,6 +555,96 @@
                     </tr>
                   </thead>
                   <tbody id="admin-countries-list">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- 2G. TAB: Currency Management -->
+        <div
+          id="admin-tab-currencies"
+          class="admin-tab-content"
+          style="display: none"
+        >
+          <div class="admin-dashboard-layout">
+            <aside class="admin-sidebar-card">
+              <h3>Add Currency</h3>
+              <p class="admin-sidebar-note">
+                Exchange rate is relative to 1 INR. Disable a currency to hide
+                it from the storefront currency selector.
+              </p>
+              <form id="add-currency-form" onsubmit="handleCreateCurrency(event)">
+                <div class="form-group">
+                  <label for="new-currency-code">Currency Code *</label>
+                  <input
+                    type="text"
+                    id="new-currency-code"
+                    placeholder="e.g., CHF, JPY, AUD"
+                    maxlength="3"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="new-currency-country">Country *</label>
+                  <input
+                    type="text"
+                    id="new-currency-country"
+                    placeholder="e.g., Switzerland, Japan"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="new-currency-label">Display Name</label>
+                  <input
+                    type="text"
+                    id="new-currency-label"
+                    placeholder="e.g., Swiss Franc (optional)"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="new-currency-symbol">Symbol *</label>
+                  <input
+                    type="text"
+                    id="new-currency-symbol"
+                    placeholder="e.g., CHF, ¥"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="new-currency-rate">Exchange Rate (1 INR = ?) *</label>
+                  <input
+                    type="number"
+                    id="new-currency-rate"
+                    placeholder="e.g., 0.010"
+                    min="0"
+                    step="any"
+                    required
+                  />
+                </div>
+                <div class="form-actions-row">
+                  <button type="submit" class="btn-primary">Add Currency</button>
+                </div>
+              </form>
+            </aside>
+
+            <section class="admin-main-panel">
+              <h3>Store Currencies</h3>
+              <div class="admin-table-container">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Symbol</th>
+                      <th>Name</th>
+                      <th>Country</th>
+                      <th>Exchange Rate (per ₹1)</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-currencies-list">
                     <!-- Populated dynamically -->
                   </tbody>
                 </table>
@@ -1695,6 +1787,6 @@
         console.log("INLINE CLEANUP DONE");
       })();
     </script>
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
   </body>
 </html>
